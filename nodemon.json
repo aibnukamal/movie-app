@@ -1,0 +1,14 @@
+{
+  "restartable": "rs",
+  "watch": [
+    "src",
+    "routes",
+    "views"
+  ],
+  "ext": "js json",
+  "ignore": [
+    ".git",
+    "node_modules"
+  ],
+  "exec": "node server.js"
+}
