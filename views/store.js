@@ -4,15 +4,28 @@ import { slugify } from 'transliteration'
 
 Vue.use(Vuex)
 
-const currencyFormating = (currency, value) => {
+export const currencyFormating = (currency, value) => {
   return `${currency} ${value.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}`
 }
 
 export default new Vuex.Store({
+  state:{
+    balance: 100000,
+    myMovie: []
+  },
+  mutations:{
+    creditBalance (state, credit) {
+      state.balance = state.balance - credit
+    },
+    setMyMovie (state, id) {
+      state.myMovie.push(id)
+      console.log('state.myMovie == ', state.myMovie, id)
+    }
+  },
   getters: {
-    pricing: () => (rating) => {
+    pricing: () => (rating, format = true) => {
       const price = rating === 0 ? 0 : (rating > 0 && rating <= 3 ? 3500 : (rating > 3 && rating <= 6 ? 8250 : (rating > 6 && rating <= 8 ? 16350 : 21250)))
-      return price === 0 ? '-' : currencyFormating('IDR', price)
+    return format ? (price === 0 ? '-' : currencyFormating('IDR', price)) : price
     },
     limitText: () => (text, count) => {
       return text.slice(0, count) + (text.length > count ? "..." : "")

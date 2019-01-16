@@ -1,6 +1,12 @@
 <template>
   <div>
     <h1>Tokoflix</h1>
+    <span>Saldo: {{ formatCurrency(balance) }}</span>
+    <br>
+    <br>
+    <button v-if="!isMyMovie(movie.detail.id)">Sudah Dibeli</button>
+    <button v-else @click="buy(movie.detail)">Beli {{ pricing(movie.detail.vote_average) }}</button>
+    <br>
     <br>
     <div class="container mt-2">
       <div class="row">
@@ -14,7 +20,8 @@
           <h1 class="card-title mt-5 mb-5 title-list" style="height:38px">
             {{ movie.detail.release_date.split('-')[0] }} | 
             {{ movie.detail.genres.map(g => g.name).join(', ') }} | 
-            {{ movie.detail.runtime }} mins
+            {{ movie.detail.runtime }} mins |
+            Ratings {{ movie.detail.vote_average }}
           </h1>
           <p class="card-text content-list">{{ movie.detail.overview }}</p>
           <br>
@@ -72,7 +79,8 @@
   </div>
 </template>
 <script>
-  import { mapGetters } from 'vuex'
+  import { mapGetters, mapState } from 'vuex'
+  import { currencyFormating } from './../store'
   export default {
     data(){
       return{
@@ -88,6 +96,7 @@
       this.scroll(this.items)
     },
     computed: {
+      ...mapState(['balance', 'myMovie']),
       ...mapGetters(['slug', 'image', 'limitText', 'pricing'])
     },
     methods: {
@@ -108,6 +117,17 @@
       },
       scroll (items) {
         window.onscroll = () => false
+      },
+      formatCurrency(price){
+        return currencyFormating('IDR', price)
+      },
+      buy(movie){
+        const amount = this.pricing(movie.vote_average, false)
+        this.$store.commit('creditBalance', amount)
+        this.$store.commit('setMyMovie', movie.id)
+      },
+      isMyMovie(id){
+        return this.myMovie.indexOf(id) === -1
       }
     }
   }

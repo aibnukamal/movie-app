@@ -1,6 +1,8 @@
 <template>
   <div>
     <h1>Tokoflix</h1>
+    <span>Saldo: {{ formatCurrency(balance) }}</span>
+    <br>
     <br>
     <div class="container mt-2">
       <div class="row">
@@ -22,7 +24,8 @@
   </div>
 </template>
 <script> 
-  import { mapGetters } from 'vuex'
+  import { mapGetters, mapState } from 'vuex'
+  import { currencyFormating } from './../store'
   export default {
     data(){
       return{
@@ -35,12 +38,16 @@
       window.history.pushState({}, '/', `?`)
     },
     computed: {
+      ...mapState(['balance']),
       ...mapGetters(['slug', 'image', 'limitText', 'pricing', 'getParameterByName'])
     },
     methods: {
       fetchItems(){
         const uri = 'http://localhost:4000/api/movie/now-playing'
         this.axios.get(uri).then((response) => this.items = response.data.data.results)
+      },
+      formatCurrency(price){
+        return currencyFormating('IDR', price)
       },
       scroll (items) {
         window.onscroll = () => {
