@@ -13,8 +13,8 @@ const Response = (response) => {
   }
 }
 
-const GetNowPlaying = async () => {
-  const url = `${config.apiHost}/${config.apiVersion}/movie/now_playing?api_key=${config.apiKey}&language=id&page=1&region=id`
+const GetNowPlaying = async (page = 1) => {
+  const url = `${config.apiHost}/${config.apiVersion}/movie/now_playing?api_key=${config.apiKey}&language=id&page=${page}`
   const response = await axios.get(url)
     .then(response => response)
     .catch(e => e.response)

@@ -31,12 +31,15 @@ div [class^="col-"]{
   color:#18d4ca;
   
 }
+.card-block{
+  border: solid 2px #f1f1f1 !important;
+}
 .card:hover{
   transform: scale(1.05);
   box-shadow: 10px 10px 15px rgba(0,0,0,0.3);
 }
 .card-text{
-  height:80px;  
+  height:80px;
 }
 .card::before, .card::after {
   position: absolute;
@@ -58,4 +61,18 @@ div [class^="col-"]{
 }
 .card:hover::before, .card:hover::after, .card:focus::before, .card:focus::after {
   transform: scale3d(1, 1, 1);
+}
+.margin-20{
+  margin-bottom: 20px !important;
+}
+.title-list{
+  padding: 10px;
+  margin: 0px;
+  background: #fff;
+  height:60px
+}
+.content-list{
+  padding: 10px;
+  margin: 0px;
+  background: #fff;
 }

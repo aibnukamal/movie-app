@@ -5,7 +5,8 @@ const { GetNowPlaying } = require('./../controllers/movieController')
 
 
 routes.route('/now-playing').get( async (req, res) => {
-  const response = await GetNowPlaying()
+  const page = req.query.page
+  const response = await GetNowPlaying(page)
 
   res.json(response)
 })
