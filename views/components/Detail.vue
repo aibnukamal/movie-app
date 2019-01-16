@@ -85,6 +85,7 @@
       this.fetchItems()
       this.fetchSimiliar()
       this.fetchRecomendation()
+      this.scroll(this.items)
     },
     computed: {
       ...mapGetters(['slug', 'image', 'limitText', 'pricing'])
@@ -104,6 +105,9 @@
         const path = window.location.pathname.substring(window.location.pathname.lastIndexOf('/') + 1).split('-')
         const uri = `http://localhost:4000/api/movie/recomendation/${path[0]}`
         this.axios.get(uri).then((response) => this.recomendations = response.data.data.results.slice(0, 6))
+      },
+      scroll (items) {
+        window.onscroll = () => false
       }
     }
   }
