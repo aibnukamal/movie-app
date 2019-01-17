@@ -7,15 +7,15 @@
     </h1>
     <h4 style="float: right">
       <router-link :to="{name: 'List'}">
-        Kembali
+        Back
       </router-link>
     </h4>
-    <span>Saldo: {{ formatCurrency(balance) }}</span>
+    <span>Balance: {{ formatCurrency(balance) }}</span>
     <br>
     <br>
-    <button v-if="!isMyMovie(movie.detail)">Sudah Dibeli</button>
-    <button v-else-if="balance < pricing(movie.vote_average, false)">Saldo tidak mencukupi</button>
-    <button v-else @click="buy(movie.detail)">Beli {{ pricing(movie.detail.vote_average) }}</button>
+    <button v-if="!isMyMovie(movie.detail)">Purchased</button>
+    <button v-else-if="balance < pricing(movie.detail.vote_average, false)">Insufficient balance</button>
+    <button v-else-if="pricing(movie.detail.vote_average, false) != 0" @click="buy(movie.detail)">Buy {{ pricing(movie.detail.vote_average) }}</button>
     <br>
     <br>
     <div class="container mt-2">
@@ -26,22 +26,25 @@
           </div>
         </div>
         <div class="col-md-8 col-sm-12 margin-20">
-          <h1 class="card-title mt-5 mb-5 title-list" style="height:38px"><a :href="`${movie.detail.hompage}`" target="_blank">{{ movie.detail.original_title }}</a></h1>
-          <h1 class="card-title mt-5 mb-5 title-list" style="height:38px">
-            {{ movie.detail.release_date.split('-')[0] }} |
-            {{ movie.detail.genres.map(g => g.name).join(', ') }} |
-            {{ movie.detail.runtime }} mins |
-            Ratings {{ movie.detail.vote_average }}
-          </h1>
-          <p class="card-text content-list">{{ movie.detail.overview }}</p>
-          <br>
-          <h4 class="card-title mt-3 mb-3 title-list">Star : </h4>
-          <div class="col-md-3 col-sm-12" v-for="cast in movie.cast.cast.slice(0, 5)" :key="cast.index" style="margin:5px; border: 1px solid #f1f1f1;padding:0px">
-            <div class="col-md-4 col-sm-12" style="margin:0px;padding:0px">
-              <img style="width:100%" :src="`https://image.tmdb.org/t/p/w300_and_h450_bestv2${ cast.profile_path }`" :alt="`Photo of ${cast.name}`" >
-            </div>
-            <div class="col-md-7 col-sm-12">
-              <p><strong>{{ cast.name }}</strong> as {{ cast.character }}</p>
+          <div class="col-md-12 col-sm-12" style="float:right">
+            <h1 class="card-title mt-5 mb-5 title-list" style="height:38px"><a :href="`${movie.detail.hompage}`" target="_blank">{{ movie.detail.original_title }}</a></h1>
+            <h1 class="card-title mt-5 mb-5 title-list" style="height:38px">
+              {{ movie.detail.release_date.split('-')[0] }} |
+              {{ movie.detail.genres.map(g => g.name).join(', ') }} |
+              {{ movie.detail.runtime }} mins
+              {{ movie.detail.vote_average > 0 ? ` | Rating ${movie.detail.vote_average}` : ''}}
+            </h1>
+            <div style="padding:10px">{{ movie.detail.overview }}</div>
+          </div>
+          <div class="col-md-12 col-sm-12" style="float:right">
+            <h4 class="card-title mt-3 mb-3 title-list">Star : </h4>
+            <div class="col-md-3 col-sm-12" v-for="cast in movie.cast.cast.slice(0, 5)" :key="cast.index" style="margin:5px; border: 1px solid #f1f1f1;padding:0px">
+              <div class="col-md-4 col-sm-12" style="margin:0px;padding:0px">
+                <img style="width:100%" :src="`https://image.tmdb.org/t/p/w300_and_h450_bestv2${ cast.profile_path }`" :alt="`Photo of ${cast.name}`" >
+              </div>
+              <div class="col-md-7 col-sm-12">
+                <p><strong>{{ cast.name }}</strong> as {{ cast.character }}</p>
+              </div>
             </div>
           </div>
         </div>
@@ -157,9 +160,7 @@ export default {
     isMyMovie (movie) {
       return this.myMovie.indexOf(movie.id) === -1
     },
-    scrolltop () {
-      window.scrollTo(0, 0)
-    }
+    scrolltop: () => window.scrollTo(0, 0)
   }
 }
 </script>

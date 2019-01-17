@@ -11,7 +11,10 @@ export const currencyFormating = (currency, value) => {
 export default new Vuex.Store({
   state: {
     balance: 100000,
-    myMovie: []
+    myMovie: [],
+    filter: {
+      country: 'id'
+    }
   },
   mutations: {
     creditBalance (state, credit) {
@@ -21,12 +24,15 @@ export default new Vuex.Store({
     },
     setMyMovie (state, id) {
       state.myMovie.push(id)
+    },
+    setCountry (state, code) {
+      state.filter.country = code
     }
   },
   getters: {
-    pricing: () => (rating, format = true) => {
+    pricing: () => (rating = 0, format = true) => {
       const price = rating === 0 ? 0 : (rating > 0 && rating <= 3 ? 3500 : (rating > 3 && rating <= 6 ? 8250 : (rating > 6 && rating <= 8 ? 16350 : 21250)))
-      return format ? (price === 0 ? '-' : currencyFormating('IDR', price)) : price
+      return format ? (price === 0 ? '-' : currencyFormating('IDR', price)) : (price === 0 ? 0 : price)
     },
     limitText: () => (text, count) => {
       return text.slice(0, count) + (text.length > count ? '...' : '')
