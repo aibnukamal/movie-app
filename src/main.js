@@ -10,11 +10,8 @@ import store from './components/store'
 Vue.use(VueAxios, axios)
 
 Vue.config.productionTip = false
-
-if (process.env.NODE_ENV === 'production') {
-  Vue.config.debug = false
-  Vue.config.silent = true
-}
+Vue.config.debug = false
+Vue.config.silent = true
 
 /* eslint-disable no-new */
 new Vue({

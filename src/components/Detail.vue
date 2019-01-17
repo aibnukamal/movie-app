@@ -5,7 +5,7 @@
         Tokoflix
       </router-link>
     </h1>
-    <h4 style="float: right">
+    <h4 class="float-right">
       <router-link :to="{name: 'List'}">
         Back
       </router-link>
@@ -26,21 +26,21 @@
           </div>
         </div>
         <div class="col-md-8 col-sm-12 margin-20">
-          <div class="col-md-12 col-sm-12" style="float:right">
-            <h1 class="card-title mt-5 mb-5 title-list" style="height:38px"><a :href="`${movie.detail.hompage}`" target="_blank">{{ movie.detail.original_title }}</a></h1>
-            <h1 class="card-title mt-5 mb-5 title-list" style="height:38px">
+          <div class="col-md-12 col-sm-12 float-right">
+            <h1 class="card-title mt-5 mb-5 title-list h38"><a :href="`${movie.detail.hompage}`" target="_blank">{{ movie.detail.original_title }}</a></h1>
+            <h1 class="card-title mt-5 mb-5 title-list h38">
               {{ movie.detail.release_date.split('-')[0] }} |
               {{ movie.detail.genres.map(g => g.name).join(', ') }} |
               {{ movie.detail.runtime }} mins
               {{ movie.detail.vote_average > 0 ? ` | Rating ${movie.detail.vote_average}` : ''}}
             </h1>
-            <div style="padding:10px">{{ movie.detail.overview }}</div>
+            <div class="pad-10">{{ movie.detail.overview }}</div>
           </div>
-          <div class="col-md-12 col-sm-12" style="float:right">
+          <div class="col-md-12 col-sm-12 float-right">
             <h4 class="card-title mt-3 mb-3 title-list">Star : </h4>
-            <div class="col-md-3 col-sm-12" v-for="cast in movie.cast.cast.slice(0, 5)" :key="cast.index" style="margin:5px; border: 1px solid #f1f1f1;padding:0px">
-              <div class="col-md-4 col-sm-12" style="margin:0px;padding:0px">
-                <img style="width:100%" :src="`https://image.tmdb.org/t/p/w300_and_h450_bestv2${ cast.profile_path }`" :alt="`Photo of ${cast.name}`" >
+            <div class="col-md-3 col-sm-12 card-cast" v-for="cast in movie.cast.cast.slice(0, 5)" :key="cast.index">
+              <div class="col-md-4 col-sm-12 all0">
+                <img class="w100" :src="`https://image.tmdb.org/t/p/w300_and_h450_bestv2${ cast.profile_path }`" :alt="`Photo of ${cast.name}`" >
               </div>
               <div class="col-md-7 col-sm-12">
                 <p><strong>{{ cast.name }}</strong> as {{ cast.character }}</p>
@@ -119,7 +119,7 @@ export default {
   },
   computed: {
     ...mapState(['balance', 'myMovie']),
-    ...mapGetters(['slug', 'image', 'limitText', 'pricing'])
+    ...mapGetters(['slug', 'image', 'limitText', 'pricing', 'isMyMovie'])
   },
   methods: {
     fetchItems (ids = null) {
@@ -146,20 +146,13 @@ export default {
       const uri = `https://api.themoviedb.org/3/movie/${id}/recommendations?api_key=c7c69aa876af679ca32ddbbe0e533952&language=en-US&page=1`
       this.axios.get(uri).then((response) => { this.recomendations = response.data.results.slice(0, 6) })
     },
-    scroll (items) {
-      window.onscroll = () => false
-    },
-    formatCurrency (price) {
-      return currencyFormating('IDR', price)
-    },
     buy (movie) {
       const amount = this.pricing(movie.vote_average, false)
       this.$store.commit('creditBalance', amount)
       this.$store.commit('setMyMovie', movie.id)
     },
-    isMyMovie (movie) {
-      return this.myMovie.indexOf(movie.id) === -1
-    },
+    scroll (items) { window.onscroll = () => false },
+    formatCurrency: (price) => currencyFormating('IDR', price),
     scrolltop: () => window.scrollTo(0, 0)
   }
 }

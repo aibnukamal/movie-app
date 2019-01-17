@@ -76,3 +76,33 @@ div [class^="col-"]{
   margin: 0px;
   background: #fff;
 }
+.float-right{
+  float:right;
+}
+.status-p-card{
+  background: #00000094;
+  top: 5px;
+  left: 15px;
+  position: absolute;
+  font-weight: 500;
+  padding: 2px;
+  color: #fff;
+}
+.h38{
+  height:38px;
+}
+.pad-10{
+  padding:10px;
+}
+.all0{
+  margin:0px;
+  padding:0px
+}
+.w100{
+  width:100%
+}
+.card-cast{
+  margin:5px;
+  border: 1px solid #f1f1f1;
+  padding:0px;
+}

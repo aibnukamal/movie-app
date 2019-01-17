@@ -1,6 +1,6 @@
 <template>
   <div>
-    <select v-model="filter.country" v-on:change="selectRegion()" style="float:right">
+    <select v-model="filter.country" v-on:change="selectRegion()" class="float-right">
       <option disabled>Select Region</option>
       <option value="all">All Country</option>
       <option value="id">Indonesia</option>
@@ -18,6 +18,7 @@
           <router-link :to="{name: 'Detail', params: { id: item.id, slug: slug(item.original_title) }}">
           <div class="card card-block">
             <img :src="image(item)" :alt="`Photo of ${item.original_title}`" >
+            <span v-if="!isMyMovie(item)" class="status-p-card">Purchased</span>
             <h5 class="card-title mt-3 mb-3 title-list">{{ limitText(item.original_title, 17) }}</h5>
             <p class="card-text content-list">
               Rating: {{ item.vote_average }}
@@ -48,7 +49,7 @@ export default {
   },
   computed: {
     ...mapState(['balance', 'filter']),
-    ...mapGetters(['slug', 'image', 'limitText', 'pricing', 'getParameterByName'])
+    ...mapGetters(['slug', 'image', 'limitText', 'pricing', 'getParameterByName', 'isMyMovie'])
   },
   methods: {
     fetchItems () {
@@ -57,9 +58,6 @@ export default {
       this.axios.get(uri).then((response) => {
         this.items = response.data.results
       })
-    },
-    formatCurrency (price) {
-      return currencyFormating('IDR', price)
     },
     scroll (items) {
       window.onscroll = () => {
@@ -85,7 +83,8 @@ export default {
       this.$store.commit('setCountry', this.filter.country)
       this.fetchItems()
       window.history.pushState({}, '/', `?`)
-    }
+    },
+    formatCurrency: (price) => currencyFormating('IDR', price)
   }
 }
 </script>
