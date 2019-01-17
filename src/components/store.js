@@ -15,11 +15,12 @@ export default new Vuex.Store({
   },
   mutations: {
     creditBalance (state, credit) {
-      state.balance = state.balance - credit
+      if (state.balance > credit) {
+        state.balance = state.balance - credit
+      }
     },
     setMyMovie (state, id) {
       state.myMovie.push(id)
-      console.log('state.myMovie == ', state.myMovie, id)
     }
   },
   getters: {

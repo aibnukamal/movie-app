@@ -5,10 +5,16 @@
         Tokoflix
       </router-link>
     </h1>
+    <h4 style="float: right">
+      <router-link :to="{name: 'List'}">
+        Kembali
+      </router-link>
+    </h4>
     <span>Saldo: {{ formatCurrency(balance) }}</span>
     <br>
     <br>
     <button v-if="!isMyMovie(movie.detail)">Sudah Dibeli</button>
+    <button v-else-if="balance < pricing(movie.vote_average, false)">Saldo tidak mencukupi</button>
     <button v-else @click="buy(movie.detail)">Beli {{ pricing(movie.detail.vote_average) }}</button>
     <br>
     <br>
@@ -47,7 +53,7 @@
     <div class="container mt-2">
       <div class="row">
         <div v-for="similiar in similiars" :key="similiar.index" class="col-md-2 col-sm-12 margin-20">
-          <router-link :to="{name: 'Detail', params: { id: similiar.id, slug: slug(similiar.original_title) }}">
+          <router-link :to="{name: 'Detail', params: { id: similiar.id, slug: slug(similiar.original_title) }}" v-on-click="scrolltop()">
           <div class="card card-block">
             <img :src="`${ image(similiar) }`" :alt="`Photo of ${similiar.original_title}`" >
             <h5 class="card-title mt-3 mb-3 title-list">{{ limitText(similiar.original_title, 17) }}</h5>
@@ -66,7 +72,7 @@
     <div class="container mt-2">
       <div class="row">
         <div v-for="recommendation in recomendations" :key="recommendation.index" class="col-md-2 col-sm-12 margin-20">
-          <router-link :to="{name: 'Detail', params: { id: recommendation.id, slug: slug(recommendation.original_title) }}">
+          <router-link :to="{name: 'Detail', params: { id: recommendation.id, slug: slug(recommendation.original_title) }}" v-on-click="scrolltop()">
           <div class="card card-block">
             <img :src="`${ image(recommendation) }`" :alt="`Photo of ${recommendation.original_title}`" >
             <h5 class="card-title mt-3 mb-3 title-list">{{ limitText(recommendation.original_title, 17) }}</h5>
@@ -86,6 +92,7 @@
 <script>
 import { mapGetters, mapState } from 'vuex'
 import { currencyFormating } from './store'
+
 export default {
   data () {
     return {
@@ -101,9 +108,10 @@ export default {
     next()
   },
   created () {
-    this.fetchItems()
-    this.fetchSimiliar()
-    this.fetchRecomendation()
+    const id = this.$router.currentRoute.params.id
+    this.fetchItems(id)
+    this.fetchSimiliar(id)
+    this.fetchRecomendation(id)
     this.scroll(this.items)
   },
   computed: {
@@ -112,7 +120,7 @@ export default {
   },
   methods: {
     fetchItems (ids = null) {
-      const id = ids || window.location.pathname.substring(window.location.pathname.lastIndexOf('/') + 1).split('-')[0]
+      const id = ids || this.$router.currentRoute.params.id
       const detailUrl = `https://api.themoviedb.org/3/movie/${id}?api_key=c7c69aa876af679ca32ddbbe0e533952&language=en-US`
       const castUrl = `https://api.themoviedb.org/3/movie/${id}/credits?api_key=c7c69aa876af679ca32ddbbe0e533952`
 
@@ -127,15 +135,13 @@ export default {
           this.movie = { detail, cast }
         }))
     },
-    fetchSimiliar (ids = null) {
-      const id = ids || window.location.pathname.substring(window.location.pathname.lastIndexOf('/') + 1).split('-')[0]
+    fetchSimiliar (id) {
       const uri = `https://api.themoviedb.org/3/movie/${id}/similar?api_key=c7c69aa876af679ca32ddbbe0e533952&language=en-US&page=1`
-      this.similiars = this.axios.get(uri).then((response) => response.data.results.slice(0, 6))
+      this.axios.get(uri).then((response) => { this.similiars = response.data.results.slice(0, 6) })
     },
-    fetchRecomendation (ids = null) {
-      const id = ids || window.location.pathname.substring(window.location.pathname.lastIndexOf('/') + 1).split('-')[0]
+    fetchRecomendation (id) {
       const uri = `https://api.themoviedb.org/3/movie/${id}/recommendations?api_key=c7c69aa876af679ca32ddbbe0e533952&language=en-US&page=1`
-      this.recomendations = this.axios.get(uri).then((response) => response.data.results.slice(0, 6))
+      this.axios.get(uri).then((response) => { this.recomendations = response.data.results.slice(0, 6) })
     },
     scroll (items) {
       window.onscroll = () => false
@@ -150,6 +156,9 @@ export default {
     },
     isMyMovie (movie) {
       return this.myMovie.indexOf(movie.id) === -1
+    },
+    scrolltop () {
+      window.scrollTo(0, 0)
     }
   }
 }
