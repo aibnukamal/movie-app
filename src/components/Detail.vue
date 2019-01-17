@@ -1,10 +1,14 @@
 <template>
   <div>
-    <h1>Tokoflix</h1>
+    <h1>
+      <router-link :to="{name: 'List'}">
+        Tokoflix
+      </router-link>
+    </h1>
     <span>Saldo: {{ formatCurrency(balance) }}</span>
     <br>
     <br>
-    <button v-if="!isMyMovie(movie.detail.id)">Sudah Dibeli</button>
+    <button v-if="!isMyMovie(movie.detail)">Sudah Dibeli</button>
     <button v-else @click="buy(movie.detail)">Beli {{ pricing(movie.detail.vote_average) }}</button>
     <br>
     <br>
@@ -18,8 +22,8 @@
         <div class="col-md-8 col-sm-12 margin-20">
           <h1 class="card-title mt-5 mb-5 title-list" style="height:38px"><a :href="`${movie.detail.hompage}`" target="_blank">{{ movie.detail.original_title }}</a></h1>
           <h1 class="card-title mt-5 mb-5 title-list" style="height:38px">
-            {{ movie.detail.release_date.split('-')[0] }} | 
-            {{ movie.detail.genres.map(g => g.name).join(', ') }} | 
+            {{ movie.detail.release_date.split('-')[0] }} |
+            {{ movie.detail.genres.map(g => g.name).join(', ') }} |
             {{ movie.detail.runtime }} mins |
             Ratings {{ movie.detail.vote_average }}
           </h1>
@@ -51,7 +55,7 @@
               Rating: {{ similiar.vote_average }}
               <br>
               Price: {{ pricing(similiar.vote_average) }}
-            </p> 
+            </p>
           </div>
           </router-link>
         </div>
@@ -70,65 +74,83 @@
               Rating: {{ recommendation.vote_average }}
               <br>
               Price: {{ pricing(recommendation.vote_average) }}
-            </p> 
+            </p>
           </div>
           </router-link>
         </div>
-      </div>
+    </div>
     </div>
   </div>
 </template>
+
 <script>
-  import { mapGetters, mapState } from 'vuex'
-  import { currencyFormating } from './../store'
-  export default {
-    data(){
-      return{
-        movie: [],
-        similiars: [],
-        recomendations: []
-      }
+import { mapGetters, mapState } from 'vuex'
+import { currencyFormating } from './store'
+export default {
+  data () {
+    return {
+      movie: [],
+      similiars: [],
+      recomendations: []
+    }
+  },
+  beforeRouteUpdate (to, from, next) {
+    this.movie = this.fetchItems(to.params.id)
+    this.similiars = this.fetchSimiliar(to.params.id)
+    this.recomendations = this.fetchRecomendation(to.params.id)
+    next()
+  },
+  created () {
+    this.fetchItems()
+    this.fetchSimiliar()
+    this.fetchRecomendation()
+    this.scroll(this.items)
+  },
+  computed: {
+    ...mapState(['balance', 'myMovie']),
+    ...mapGetters(['slug', 'image', 'limitText', 'pricing'])
+  },
+  methods: {
+    fetchItems (ids = null) {
+      const id = ids || window.location.pathname.substring(window.location.pathname.lastIndexOf('/') + 1).split('-')[0]
+      const detailUrl = `https://api.themoviedb.org/3/movie/${id}?api_key=c7c69aa876af679ca32ddbbe0e533952&language=en-US`
+      const castUrl = `https://api.themoviedb.org/3/movie/${id}/credits?api_key=c7c69aa876af679ca32ddbbe0e533952`
+
+      this.axios.all([
+        this.axios.get(detailUrl),
+        this.axios.get(castUrl)
+      ])
+        .then(this.axios.spread((detailRes, castRes) => {
+          const detail = detailRes.data
+          const cast = castRes.data
+
+          this.movie = { detail, cast }
+        }))
     },
-    created() {
-      this.fetchItems()
-      this.fetchSimiliar()
-      this.fetchRecomendation()
-      this.scroll(this.items)
+    fetchSimiliar (ids = null) {
+      const id = ids || window.location.pathname.substring(window.location.pathname.lastIndexOf('/') + 1).split('-')[0]
+      const uri = `https://api.themoviedb.org/3/movie/${id}/similar?api_key=c7c69aa876af679ca32ddbbe0e533952&language=en-US&page=1`
+      this.similiars = this.axios.get(uri).then((response) => response.data.results.slice(0, 6))
     },
-    computed: {
-      ...mapState(['balance', 'myMovie']),
-      ...mapGetters(['slug', 'image', 'limitText', 'pricing'])
+    fetchRecomendation (ids = null) {
+      const id = ids || window.location.pathname.substring(window.location.pathname.lastIndexOf('/') + 1).split('-')[0]
+      const uri = `https://api.themoviedb.org/3/movie/${id}/recommendations?api_key=c7c69aa876af679ca32ddbbe0e533952&language=en-US&page=1`
+      this.recomendations = this.axios.get(uri).then((response) => response.data.results.slice(0, 6))
     },
-    methods: {
-      fetchItems(){
-        const path = window.location.pathname.substring(window.location.pathname.lastIndexOf('/') + 1).split('-')
-        const uri = `http://localhost:4000/api/movie/detail/${path[0]}`
-        this.axios.get(uri).then((response) => this.movie = response.data.data)
-      },
-      fetchSimiliar(){
-        const path = window.location.pathname.substring(window.location.pathname.lastIndexOf('/') + 1).split('-')
-        const uri = `http://localhost:4000/api/movie/similiar/${path[0]}`
-        this.axios.get(uri).then((response) => this.similiars = response.data.data.results.slice(0, 6))
-      },
-      fetchRecomendation(){
-        const path = window.location.pathname.substring(window.location.pathname.lastIndexOf('/') + 1).split('-')
-        const uri = `http://localhost:4000/api/movie/recomendation/${path[0]}`
-        this.axios.get(uri).then((response) => this.recomendations = response.data.data.results.slice(0, 6))
-      },
-      scroll (items) {
-        window.onscroll = () => false
-      },
-      formatCurrency(price){
-        return currencyFormating('IDR', price)
-      },
-      buy(movie){
-        const amount = this.pricing(movie.vote_average, false)
-        this.$store.commit('creditBalance', amount)
-        this.$store.commit('setMyMovie', movie.id)
-      },
-      isMyMovie(id){
-        return this.myMovie.indexOf(id) === -1
-      }
+    scroll (items) {
+      window.onscroll = () => false
+    },
+    formatCurrency (price) {
+      return currencyFormating('IDR', price)
+    },
+    buy (movie) {
+      const amount = this.pricing(movie.vote_average, false)
+      this.$store.commit('creditBalance', amount)
+      this.$store.commit('setMyMovie', movie.id)
+    },
+    isMyMovie (movie) {
+      return this.myMovie.indexOf(movie.id) === -1
     }
   }
+}
 </script>
